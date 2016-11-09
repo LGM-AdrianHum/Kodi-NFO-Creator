@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 
 namespace LegeDoos.KodiNFOCreator
 {
     /// <summary>
-    /// Class representing the NFO file
+    ///     Class representing the NFO file
     /// </summary>
     public class Movie
     {
@@ -19,35 +15,35 @@ namespace LegeDoos.KodiNFOCreator
         #region.members
 
         //for def see http://wiki.xbmc.org/index.php?title=NFO_files/movies
-        public string title { get; set; }
-        public string originaltitle
+        public string Title { get; set; }
+
+        public string Originaltitle
         {
-            get
-            {
-                return title;
-            }
-        }  
-        public string sorttitle
-        {
-            get
-            {
-                return title;
-            }
-        }  
-        public int? year { get; set; }
-        public bool ShouldSerializeyear()
-        {
-            return year.HasValue;
-        }
-        public string outline { get; set; }
-        public string plot { get; set; }
-        public int? runtime { get; set; }
-        public bool ShouldSerializeruntime()
-        {
-            return runtime.HasValue;
+            get { return Title; }
         }
 
-        public static XmlSerializer xs;
+        public string Sorttitle
+        {
+            get { return Title; }
+        }
+
+        public int? Year { get; set; }
+
+        public bool ShouldSerializeyear()
+        {
+            return Year.HasValue;
+        }
+
+        public string Outline { get; set; }
+        public string Plot { get; set; }
+        public int? Runtime { get; set; }
+
+        public bool ShouldSerializeruntime()
+        {
+            return Runtime.HasValue;
+        }
+
+        public static XmlSerializer Xs;
 
         #endregion
 
@@ -61,16 +57,16 @@ namespace LegeDoos.KodiNFOCreator
         {
             if (!Init(file))
             {
-                throw new Exception(string.Format("File {0} not found", file));
+                throw new Exception($"File {file} not found");
             }
-            xs = new XmlSerializer(typeof(Movie));
+            Xs = new XmlSerializer(typeof(Movie));
         }
 
         #endregion
 
         #region.methods
 
-        private Boolean Init(string file)
+        private bool Init(string file)
         {
             if (File.Exists(file))
             {
@@ -80,31 +76,33 @@ namespace LegeDoos.KodiNFOCreator
             return false;
         }
 
-        public Boolean SaveNFO(string TargetFileName)
+        public bool SaveNfo(string targetFileName)
         {
-            Boolean retVal = false;
+            var retVal = false;
 
-            if (File.Exists(TargetFileName))
+            if (File.Exists(targetFileName))
             {
-                if (MessageBox.Show(string.Format("File {0} exists, overwrite?", TargetFileName), "Confirm", MessageBoxButtons.YesNo) == DialogResult.No)
+                if (
+                    MessageBox.Show(string.Format("File {0} exists, overwrite?", targetFileName), "Confirm",
+                        MessageBoxButtons.YesNo) == DialogResult.No)
                     return retVal;
             }
 
             //fix empty values
-            if (outline != null && outline.Length == 0)
+            if (Outline != null && Outline.Length == 0)
             {
-                outline = null;
+                Outline = null;
             }
-            if (plot != null && plot.Length == 0)
+            if (Plot != null && Plot.Length == 0)
             {
-                plot = null;
+                Plot = null;
             }
 
-            if (Directory.Exists(Path.GetDirectoryName(TargetFileName)))
+            if (Directory.Exists(Path.GetDirectoryName(targetFileName)))
             {
-                using (StreamWriter sw = new StreamWriter(TargetFileName))
+                using (var sw = new StreamWriter(targetFileName))
                 {
-                    xs.Serialize(sw, this);
+                    Xs.Serialize(sw, this);
                 }
                 retVal = true;
             }

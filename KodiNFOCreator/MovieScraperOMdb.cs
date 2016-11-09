@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.Serialization;
-using System.Xml;
 using System.Net;
 using System.Xml.Linq;
-using System.IO;
-
-
 
 namespace LegeDoos.KodiNFOCreator
 {
-    class MovieScraperOMdb : MovieScraper
+    internal class MovieScraperOMdb : MovieScraper
     {
         public MovieScraperOMdb()
         {
@@ -23,8 +16,8 @@ namespace LegeDoos.KodiNFOCreator
         public override void SearchForTitlePart(string titlePart)
         {
             InitSearchResults();
-            string request = CreateSearchRequest(titlePart);
-            XDocument result = MakeRequest(request);
+            var request = CreateSearchRequest(titlePart);
+            var result = MakeRequest(request);
             if (result != null)
             {
                 ProcessResponse(result);
@@ -35,19 +28,18 @@ namespace LegeDoos.KodiNFOCreator
 
         private string CreateSearchRequest(string queryString)
         {
-            string request = "http://www.omdbapi.com/?s={0}&r=xml";
-            return (string.Format(request, queryString));
+            var request = "http://www.omdbapi.com/?s={0}&r=xml";
+            return string.Format(request, queryString);
         }
 
         private XDocument MakeRequest(string requestUrl)
         {
             try
             {
-                HttpWebRequest request = WebRequest.Create(requestUrl) as HttpWebRequest;
-                HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-                XDocument xDoc = XDocument.Load(new StreamReader(response.GetResponseStream()));
-                return (xDoc);
-
+                var request = WebRequest.Create(requestUrl) as HttpWebRequest;
+                var response = request.GetResponse() as HttpWebResponse;
+                var xDoc = XDocument.Load(new StreamReader(response.GetResponseStream()));
+                return xDoc;
             }
             catch (Exception e)
             {
@@ -58,13 +50,13 @@ namespace LegeDoos.KodiNFOCreator
 
         private void ProcessResponse(XDocument response)
         {
-            IEnumerable<XElement> rows = response.Descendants().Where(d => d.Name == "Movie");
-            foreach (XElement element in rows)
+            var rows = response.Descendants().Where(d => d.Name == "Movie");
+            foreach (var element in rows)
             {
-                string id = element.Attribute("imdbID").Value;
+                var id = element.Attribute("imdbID").Value;
                 if (id != string.Empty)
                 {
-                    MovieInfo i = new MovieInfo(id);
+                    var i = new MovieInfo(id);
                     i.Title = GetValue(element, "Title");
                     i.Year = GetValue(element, "Year");
                     i.Type = GetValue(element, "Type");
@@ -75,7 +67,7 @@ namespace LegeDoos.KodiNFOCreator
 
         private string GetValue(XElement element, string p)
         {
-            string retVal = "";
+            var retVal = "";
             try
             {
                 retVal = element.Attribute(p).Value;
@@ -87,9 +79,6 @@ namespace LegeDoos.KodiNFOCreator
             return retVal;
         }
 
-        
-
         #endregion
     }
-
 }

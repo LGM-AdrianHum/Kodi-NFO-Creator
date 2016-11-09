@@ -1,14 +1,18 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 
 namespace LegeDoos.KodiNFOCreator
 {
     public class MovieInfo
     {
+        #region.constructors
+
+        public MovieInfo(string imDbId)
+        {
+            Id = imDbId;
+        }
+
+        #endregion
+
         //used
         public string Id { get; set; }
         public string Title { get; set; }
@@ -16,28 +20,24 @@ namespace LegeDoos.KodiNFOCreator
         public string Plot { get; set; }
         public string Runtime { get; set; }
         public string Storyline { get; set; }
-        
+
         public string Type { get; set; }
 
         //general
         public string DisplayTitle
         {
-            get
-            {
-                return string.Format("{0} ({1})", Title, Year);
-            }
+            get { return string.Format("{0} ({1})", Title, Year); }
         }
-        public string ImdbURL
+
+        public string ImdbUrl
         {
-            get
-            {
-                return string.Format("http://www.imdb.com/title/{0}/", Id);
-            }
+            get { return string.Format("http://www.imdb.com/title/{0}/", Id); }
         }
+
         public string ScraperUrl { get; set; }
 
         //not used
-        public bool status { get; set; }
+        public bool Status { get; set; }
         public string OriginalTitle { get; set; }
         public string Rating { get; set; }
         public ArrayList Genres { get; set; }
@@ -65,15 +65,5 @@ namespace LegeDoos.KodiNFOCreator
         public ArrayList ReleaseDates { get; set; }
         public ArrayList MediaImages { get; set; }
         public ArrayList RecommendedTitles { get; set; }
-
-        #region.constructors
-
-        public MovieInfo(string IMDbId)
-        {
-            Id = IMDbId;
-        }
-
-        #endregion
     }
-
 }

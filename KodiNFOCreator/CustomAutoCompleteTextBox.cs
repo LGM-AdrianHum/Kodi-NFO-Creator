@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace LegeDoos.KodiNFOCreator
@@ -11,50 +10,49 @@ namespace LegeDoos.KodiNFOCreator
 
     public class AutoCompleteTextBox : TextBox
     {
-        //middle search
-        private ListBox _listBox;
-        private bool _isAdded;
-        private String[] values;
-        public String[] Values 
-        { 
-            get
-            {
-                return values;
-            }
-            set
-            {
-                values = value;
-                if (values == null)
-                    return;
-                UpdateListBox();
-                if (this.Focused)
-                    ShowListBox();
-                
-            }
-        }
-        private String _formerValue = String.Empty;
-        /// <summary>
-        /// Is the textbox in searchmode?
-        /// </summary>
-        public Boolean IsSearching { get; set; }
-        
-        //delay
-        private Timer DelayedTextChangedTimer;
-        public event EventHandler StoppedTypingTextChanged;
         private const int StoppedTypingTimeout = 1000; //1 sec
 
-        public AutoCompleteTextBox() : base()
+        //delay
+        private Timer _delayedTextChangedTimer;
+        private string _formerValue = string.Empty;
+        private bool _isAdded;
+        //middle search
+        private ListBox _listBox;
+        private string[] _values;
+
+        public AutoCompleteTextBox()
         {
             InitializeComponent();
             ResetListBox();
         }
+
+        public string[] Values
+        {
+            get { return _values; }
+            set
+            {
+                _values = value;
+                if (_values == null)
+                    return;
+                UpdateListBox();
+                if (Focused)
+                    ShowListBox();
+            }
+        }
+
+        /// <summary>
+        ///     Is the textbox in searchmode?
+        /// </summary>
+        public bool IsSearching { get; set; }
+
+        public event EventHandler StoppedTypingTextChanged;
 
         #region.middlesearch
 
         private void InitializeComponent()
         {
             _listBox = new ListBox();
-            
+
             KeyDown += this_KeyDown;
             KeyUp += this_KeyUp;
         }
@@ -88,29 +86,29 @@ namespace LegeDoos.KodiNFOCreator
             {
                 //case Keys.Tab:
                 case Keys.Enter:
+                {
+                    if (_listBox.Visible)
                     {
-                        if (_listBox.Visible)
-                        {
-                            InsertWord((String)_listBox.SelectedItem);
-                            ResetListBox();
-                            _formerValue = Text;
-                        }
-                        break;
+                        InsertWord((string) _listBox.SelectedItem);
+                        ResetListBox();
+                        _formerValue = Text;
                     }
+                    break;
+                }
                 case Keys.Down:
-                    {
-                        if ((_listBox.Visible) && (_listBox.SelectedIndex < _listBox.Items.Count - 1))
-                            _listBox.SelectedIndex++;
+                {
+                    if (_listBox.Visible && (_listBox.SelectedIndex < _listBox.Items.Count - 1))
+                        _listBox.SelectedIndex++;
 
-                        break;
-                    }
+                    break;
+                }
                 case Keys.Up:
-                    {
-                        if ((_listBox.Visible) && (_listBox.SelectedIndex > 0))
-                            _listBox.SelectedIndex--;
+                {
+                    if (_listBox.Visible && (_listBox.SelectedIndex > 0))
+                        _listBox.SelectedIndex--;
 
-                        break;
-                    }
+                    break;
+                }
             }
         }
 
@@ -130,12 +128,12 @@ namespace LegeDoos.KodiNFOCreator
         {
             if (Text == _formerValue) return;
             _formerValue = Text;
-            String word = Text;
+            var word = Text;
 
             if (Values != null && word.Length > 0)
             {
-                String[] matches = Array.FindAll(Values,
-                                                 x => (x.ToLower().Contains(word.ToLower()) && !SelectedValues.Contains(x)));
+                var matches = Array.FindAll(Values,
+                    x => x.ToLower().Contains(word.ToLower()) && !SelectedValues.Contains(x));
                 if (matches.Length > 0)
                 {
                     ShowListBox();
@@ -145,17 +143,18 @@ namespace LegeDoos.KodiNFOCreator
                     _listBox.Height = 0;
                     _listBox.Width = 0;
                     Focus();
-                    using (Graphics graphics = _listBox.CreateGraphics())
+                    using (var graphics = _listBox.CreateGraphics())
                     {
-                        for (int i = 0; i < _listBox.Items.Count; i++)
+                        for (var i = 0; i < _listBox.Items.Count; i++)
                         {
                             _listBox.Height += _listBox.GetItemHeight(i);
                             // it item width is larger than the current one
                             // set it to the new max item width
                             // GetItemRectangle does not work for me
                             // we add a little extra space by using '_'
-                            int itemWidth = (int)graphics.MeasureString(((String)_listBox.Items[i]) + "_", _listBox.Font).Width;
-                            _listBox.Width = (_listBox.Width < itemWidth) ? itemWidth : _listBox.Width;
+                            var itemWidth =
+                                (int) graphics.MeasureString((string) _listBox.Items[i] + "_", _listBox.Font).Width;
+                            _listBox.Width = _listBox.Width < itemWidth ? itemWidth : _listBox.Width;
                         }
                     }
                 }
@@ -170,22 +169,22 @@ namespace LegeDoos.KodiNFOCreator
             }
         }
 
-        private String GetWord()
+        private string GetWord()
         {
-            String text = Text;
-            int pos = SelectionStart;
+            var text = Text;
+            var pos = SelectionStart;
 
-            int posStart = text.LastIndexOf(' ', (pos < 1) ? 0 : pos - 1);
-            posStart = (posStart == -1) ? 0 : posStart + 1;
-            int posEnd = text.IndexOf(' ', pos);
-            posEnd = (posEnd == -1) ? text.Length : posEnd;
+            var posStart = text.LastIndexOf(' ', pos < 1 ? 0 : pos - 1);
+            posStart = posStart == -1 ? 0 : posStart + 1;
+            var posEnd = text.IndexOf(' ', pos);
+            posEnd = posEnd == -1 ? text.Length : posEnd;
 
-            int length = ((posEnd - posStart) < 0) ? 0 : posEnd - posStart;
+            var length = posEnd - posStart < 0 ? 0 : posEnd - posStart;
 
             return text.Substring(posStart, length);
         }
 
-        private void InsertWord(String newTag)
+        private void InsertWord(string newTag)
         {
             /*String text = Text;
             int pos = SelectionStart;
@@ -205,12 +204,12 @@ namespace LegeDoos.KodiNFOCreator
             IsSearching = false;
         }
 
-        public List<String> SelectedValues
+        public List<string> SelectedValues
         {
             get
             {
-                String[] result = Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-               return new List<String>(result);
+                var result = Text.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+                return new List<string>(result);
             }
         }
 
@@ -220,11 +219,11 @@ namespace LegeDoos.KodiNFOCreator
 
         protected override void Dispose(bool disposing)
         {
-            if (DelayedTextChangedTimer != null)
+            if (_delayedTextChangedTimer != null)
             {
-                DelayedTextChangedTimer.Stop();
+                _delayedTextChangedTimer.Stop();
                 if (disposing)
-                    DelayedTextChangedTimer.Dispose();
+                    _delayedTextChangedTimer.Dispose();
             }
 
             base.Dispose(disposing);
@@ -232,39 +231,38 @@ namespace LegeDoos.KodiNFOCreator
 
         protected virtual void OnDelayedTextChanged(EventArgs e)
         {
-            if (this.StoppedTypingTextChanged != null)
-                this.StoppedTypingTextChanged(this, e);
+            if (StoppedTypingTextChanged != null)
+                StoppedTypingTextChanged(this, e);
         }
 
         protected override void OnTextChanged(EventArgs e)
         {
-            this.InitializeDelayedTextChangedEvent();
+            InitializeDelayedTextChangedEvent();
             base.OnTextChanged(e);
         }
 
         private void InitializeDelayedTextChangedEvent()
         {
-            if (DelayedTextChangedTimer != null)
-                DelayedTextChangedTimer.Stop();
+            if (_delayedTextChangedTimer != null)
+                _delayedTextChangedTimer.Stop();
 
-            if (DelayedTextChangedTimer == null || DelayedTextChangedTimer.Interval != StoppedTypingTimeout)
+            if (_delayedTextChangedTimer == null || _delayedTextChangedTimer.Interval != StoppedTypingTimeout)
             {
-                DelayedTextChangedTimer = new Timer();
-                DelayedTextChangedTimer.Tick += new EventHandler(HandleDelayedTextChangedTimerTick);
-                DelayedTextChangedTimer.Interval = StoppedTypingTimeout;
+                _delayedTextChangedTimer = new Timer();
+                _delayedTextChangedTimer.Tick += HandleDelayedTextChangedTimerTick;
+                _delayedTextChangedTimer.Interval = StoppedTypingTimeout;
             }
-            DelayedTextChangedTimer.Start();
+            _delayedTextChangedTimer.Start();
         }
 
         private void HandleDelayedTextChangedTimerTick(object sender, EventArgs e)
         {
-            Timer timer = sender as Timer;
+            var timer = sender as Timer;
             timer.Stop();
 
-            this.OnDelayedTextChanged(EventArgs.Empty);
+            OnDelayedTextChanged(EventArgs.Empty);
         }
-        #endregion
-        
-    }
 
+        #endregion
+    }
 }

@@ -1,93 +1,66 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
 using System.Windows.Forms;
+using LegeDoos.KodiNFOCreator.Properties;
 
 namespace LegeDoos.KodiNFOCreator
 {
-    class Handler
+    internal class Handler
     {
-        Movie NFO;
-        MovieScraper MovieScraper;
-        AutoCompleteTextBox formAutoCompleteTextBox;
-        ComboBox formScraperSelectComboBox;
-        Label sourceFileLabel;
-        BindingSource theBindingSource;
-        
         public enum ScraperTypes
         {
-            OMDB,
+            Omdb,
             Searchengine
         }
 
+        private const int MinimumStringSize = 3;
+        private readonly AutoCompleteTextBox _formAutoCompleteTextBox;
+        private readonly ComboBox _formScraperSelectComboBox;
+        private readonly Label _sourceFileLabel;
+        private readonly BindingSource _theBindingSource;
+        private MovieScraper _movieScraper;
+        private Movie _nfo;
+
         //public ScraperTypes SraperType { get; set; }
 
-        private Boolean SearchingExecuting;
-
-        private const int MinimumStringSize = 3;
-
-        string sourceFull { get; set; }
-        public string sourcePath
-        {
-            get 
-            {
-                return Path.GetDirectoryName(sourceFull);
-            }
-        }
-        public string sourceFile
-        {
-            get
-            {
-                return Path.GetFileName(sourceFull);
-            }
-        }
-        public string sourceExtension
-        {
-            get
-            {
-                return Path.GetExtension(sourceFull);
-            }
-        }
-        private string targetFilenameNFO
-        {
-            get
-            {
-                return string.Format("{0}\\{1}.nfo", sourcePath, Path.GetFileNameWithoutExtension(sourceFull));
-            }
-        }
+        private bool _searchingExecuting;
 
         #region.constructors
-        
-        public Handler(AutoCompleteTextBox AutoCompleteTextBox, Label SourceFileLabel, BindingSource BindingSourceNFO, ComboBox ScraperSelectCombo)
+
+        public Handler(AutoCompleteTextBox autoCompleteTextBox, Label sourceFileLabel, BindingSource bindingSourceNfo,
+            ComboBox scraperSelectCombo)
         {
-            formAutoCompleteTextBox = AutoCompleteTextBox;
-            sourceFileLabel = SourceFileLabel;
-            theBindingSource = BindingSourceNFO;
-            formScraperSelectComboBox = ScraperSelectCombo;
-            formScraperSelectComboBox.DataSource = Enum.GetValues(typeof(ScraperTypes)).Cast<ScraperTypes>();
-            formScraperSelectComboBox.SelectedItem = ScraperTypes.OMDB;
+            _formAutoCompleteTextBox = autoCompleteTextBox;
+            _sourceFileLabel = sourceFileLabel;
+            _theBindingSource = bindingSourceNfo;
+            _formScraperSelectComboBox = scraperSelectCombo;
+            _formScraperSelectComboBox.DataSource = Enum.GetValues(typeof(ScraperTypes)).Cast<ScraperTypes>();
+            _formScraperSelectComboBox.SelectedItem = ScraperTypes.Omdb;
             InitMovieScraper();
         }
 
         #endregion
 
+        public string SourceFull { get; set; }
+        public string SourcePath => Path.GetDirectoryName(SourceFull);
+        public string SourceFile => Path.GetFileName(SourceFull);
+        public string SourceExtension => Path.GetExtension(SourceFull);
+        private string TargetFilenameNfo => $"{SourcePath}\\{Path.GetFileNameWithoutExtension(SourceFull)}.nfo";
+
         #region.ui
 
-        private void Initialize(string FileName)
+        private void Initialize(string fileName)
         {
-            NFO = new Movie(FileName);
-            sourceFull = FileName;
-            sourceFileLabel.Text = sourceFile;
-            theBindingSource.DataSource = NFO;
+            _nfo = new Movie(fileName);
+            SourceFull = fileName;
+            _sourceFileLabel.Text = SourceFile;
+            _theBindingSource.DataSource = _nfo;
         }
 
         public void OpenFile()
         {
-            OpenFileDialog dlg = new OpenFileDialog();
+            var dlg = new OpenFileDialog();
             dlg.Multiselect = false;
 
             if (dlg.ShowDialog() == DialogResult.OK && dlg.FileName != null)
@@ -96,52 +69,38 @@ namespace LegeDoos.KodiNFOCreator
             }
         }
 
-        internal void CreateNFO()
+        internal void CreateNfo()
         {
-            Boolean exportNFO;
-            Boolean exportURL;
-            Boolean success = true;
-
-            string filename = "";
-
-            if (sourceFile == null || sourceFile.Length == 0)
+            if (string.IsNullOrEmpty(SourceFile))
             {
-                MessageBox.Show("No media file selected!");
+                MessageBox.Show(Resources.Handler_CreateNfo_No_media_file_selected_);
                 return;
             }
 
-            exportNFO = NFO != null && NFO.title != null && NFO.title.Length > 0;
-            exportURL = false;
+            var exportNfo = !string.IsNullOrEmpty(_nfo?.Title);
 
-            if (!exportNFO && !exportURL)
+            if (!exportNfo)
             {
-                MessageBox.Show("You have to select a online title or enter a custom title to use the create NFO function.");
+                MessageBox.Show(
+                    Resources
+                        .Handler_CreateNfo_You_have_to_select_a_online_title_or_enter_a_custom_title_to_use_the_create_NFO_function_);
                 return;
             }
 
-            if (exportNFO)
-            {
-                //export nfo
-                success = NFO.SaveNFO(targetFilenameNFO);
-            }
-            if (exportURL)
-            {
-                //add url
-                success = success && AddURLToFile();
-            }
+            //export nfo
+            _nfo.SaveNfo(TargetFilenameNfo);
             MessageBox.Show("NFO saved!");
         }
 
-        private bool AddURLToFile()
+        private bool AddUrlToFile()
         {
-            Boolean retVal = false;
-            Boolean fileExists = File.Exists(targetFilenameNFO);
+            var retVal = false;
+            var fileExists = File.Exists(TargetFilenameNfo);
 
             //append url
-            File.AppendAllText(targetFilenameNFO, fileExists ? Environment.NewLine : "" + "http://www.google.com");
+            File.AppendAllText(TargetFilenameNfo, fileExists ? Environment.NewLine : "" + "http://www.google.com");
             retVal = true;
-            return retVal;
-
+            return true;
         }
 
         internal void MakeFindableForCouchPotato()
@@ -153,47 +112,47 @@ namespace LegeDoos.KodiNFOCreator
         {
             InitMovieScraper();
         }
+
         private void InitMovieScraper()
         {
-            ScraperTypes type = (ScraperTypes)Enum.Parse(typeof(ScraperTypes), formScraperSelectComboBox.Text);
+            var type = (ScraperTypes) Enum.Parse(typeof(ScraperTypes), _formScraperSelectComboBox.Text);
 
             switch (type)
             {
-                case ScraperTypes.OMDB:
-                    MovieScraper = new MovieScraperOMdb();
+                case ScraperTypes.Omdb:
+                    _movieScraper = new MovieScraperOMdb();
                     break;
                 case ScraperTypes.Searchengine:
-                    MovieScraper = new MovieScraperSearchEngine();
+                    _movieScraper = new MovieScraperSearchEngine();
                     break;
                 default:
                     //default to omdb
-                    MovieScraper = new MovieScraperOMdb();
+                    _movieScraper = new MovieScraperOMdb();
                     break;
             }
-
         }
-        
+
         #endregion
 
         #region.search
 
         internal void DoSearch(string p)
         {
-            if (!SearchingExecuting && MovieScraper != null && formAutoCompleteTextBox.IsSearching)
+            if (!_searchingExecuting && _movieScraper != null && _formAutoCompleteTextBox.IsSearching)
             {
-                SearchingExecuting = true;
-                if (p.ToLower() != formAutoCompleteTextBox.Text.ToLower())
+                _searchingExecuting = true;
+                if (p.ToLower() != _formAutoCompleteTextBox.Text.ToLower())
                 {
-                    MovieScraper.SearchForTitlePart(p);
-                    formAutoCompleteTextBox.Values = MovieScraper.SearchResultsArray;
+                    _movieScraper.SearchForTitlePart(p);
+                    _formAutoCompleteTextBox.Values = _movieScraper.SearchResultsArray;
                 }
-                SearchingExecuting = false;
-            }   
+                _searchingExecuting = false;
+            }
         }
 
         internal void ExecuteSearch(bool force)
         {
-            string searchString = formAutoCompleteTextBox.Text.Trim();
+            var searchString = _formAutoCompleteTextBox.Text.Trim();
 
             if (searchString.Length > MinimumStringSize)
             {
@@ -201,24 +160,20 @@ namespace LegeDoos.KodiNFOCreator
             }
             else
             {
-                formAutoCompleteTextBox.Values = null;
+                _formAutoCompleteTextBox.Values = null;
             }
         }
 
         internal void StartSearch()
         {
-            formAutoCompleteTextBox.IsSearching = true;
+            _formAutoCompleteTextBox.IsSearching = true;
         }
 
         internal void StopSearch()
         {
-            formAutoCompleteTextBox.IsSearching = false;
+            _formAutoCompleteTextBox.IsSearching = false;
         }
 
         #endregion
-
-
-
-
     }
 }
