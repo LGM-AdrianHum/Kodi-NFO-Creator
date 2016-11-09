@@ -48,8 +48,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="ActorName.cs" />
+    <Compile Include="RootMovie.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VideoStreamDetails.cs" />
     <Compile Include="XmlHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
