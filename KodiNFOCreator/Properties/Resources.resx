@@ -114,4 +114,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Handler_CreateNfo_No_media_file_selected_" xml:space="preserve">
+    <value>No media file selected!</value>
+  </data>
+  <data name="Handler_CreateNfo_You_have_to_select_a_online_title_or_enter_a_custom_title_to_use_the_create_NFO_function_" xml:space="preserve">
+    <value>You have to select a online title or enter a custom title to use the create NFO function.</value>
+  </data>
 </root>

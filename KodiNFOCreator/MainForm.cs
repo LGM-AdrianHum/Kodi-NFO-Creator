@@ -1,82 +1,73 @@
-﻿using LegeDoos.KodiNFOCreator.IMDb_Scraper;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows.Forms;
 
 namespace LegeDoos.KodiNFOCreator
 {
     public partial class MainForm : Form
     {
-        Handler handler {get; set;}
-
-        
         public MainForm()
         {
             InitializeComponent();
-            handler = new Handler(autoCompleteTextBox, labelSourceFile, kodiNFOBindingSource, comboBoxScraper);
+            Handler = new Handler(autoCompleteTextBox, labelSourceFile, kodiNFOBindingSource, comboBoxScraper);
         }
+
+        private Handler Handler { get; }
 
         private void autoCompleteTextBox_StoppedTypingTextChanged(object sender, EventArgs e)
         {
             //do search with force
-            handler.ExecuteSearch(true);
+            Handler.ExecuteSearch(true);
         }
 
         private void autoCompleteTextBox_TextChanged_1(object sender, EventArgs e)
         {
             //do search on space
-            handler.StartSearch();
+            Handler.StartSearch();
             if (autoCompleteTextBox.Text.EndsWith(" "))
             {
-                handler.ExecuteSearch(false);
+                Handler.ExecuteSearch(false);
             }
         }
 
         private void openFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            handler.OpenFile();
+            Handler.OpenFile();
         }
 
         private void createNFOToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            handler.CreateNFO();
+            Handler.CreateNfo();
         }
 
         private void buttonCreateNFO_Click(object sender, EventArgs e)
         {
-            handler.CreateNFO();
+            Handler.CreateNfo();
         }
 
         private void buttonFindableCouchPotato_Click(object sender, EventArgs e)
         {
-            handler.MakeFindableForCouchPotato();
+            Handler.MakeFindableForCouchPotato();
         }
 
         private void makeFindableForCouchPotatoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            handler.MakeFindableForCouchPotato();
+            Handler.MakeFindableForCouchPotato();
         }
 
         private void comboBoxScraper_SelectedValueChanged(object sender, EventArgs e)
         {
-            if (handler != null)
-                handler.SraperChanged();
+            if (Handler != null)
+                Handler.SraperChanged();
         }
 
         private void autoCompleteTextBox_Enter(object sender, EventArgs e)
         {
-            handler.StartSearch();
+            Handler.StartSearch();
         }
 
         private void autoCompleteTextBox_Leave(object sender, EventArgs e)
         {
-            handler.StopSearch();
+            Handler.StopSearch();
         }
     }
 }

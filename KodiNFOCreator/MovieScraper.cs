@@ -1,52 +1,48 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace LegeDoos.KodiNFOCreator
 {
-
-  
-    abstract class MovieScraper
+    internal abstract class MovieScraper
     {
         //helper members
-        public enum LookupType { Simple, Normal, Extended }
+        public enum LookupType
+        {
+            Simple,
+            Normal,
+            Extended
+        }
+
         public Dictionary<string, MovieInfo> SearchResults { get; private set; } //display title, IMDbItem
         // AutoCompleteStringCollection SearchResultsAutoCompleteCollection { get; private set; }
         public string[] SearchResultsArray
         {
-            get
-            {
-                return SearchResults.Keys.ToArray();
-            }
+            get { return SearchResults.Keys.ToArray(); }
         }
-        
 
         #region.abstractMethods
 
         /// <summary>
-        /// Search based on the part of the title and fill the SearchResult
+        ///     Search based on the part of the title and fill the SearchResult
         /// </summary>
         /// <param name="titlePart">Part of the title to search for</param>
-        abstract public void SearchForTitlePart(string titlePart);
-        
+        public abstract void SearchForTitlePart(string titlePart);
+
         #endregion
 
         #region.methods
+
         /// <summary>
-        /// Clear the search results
+        ///     Clear the search results
         /// </summary>
         protected void InitSearchResults()
         {
             SearchResults = new Dictionary<string, MovieInfo>();
             //SearchResultsAutoCompleteCollection = new AutoCompleteStringCollection();
-
         }
+
         /// <summary>
-        /// Add an item to the SearchResult
+        ///     Add an item to the SearchResult
         /// </summary>
         /// <param name="displayTitle"></param>
         /// <param name="item"></param>
@@ -57,8 +53,7 @@ namespace LegeDoos.KodiNFOCreator
             SearchResults.Add(displayTitle, item);
             //SearchResultsAutoCompleteCollection.Add(displayTitle);
         }
-        
+
         #endregion
     }
-
-   }
+}
