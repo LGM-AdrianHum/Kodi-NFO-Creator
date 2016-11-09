@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml;
 using System.Xml.Serialization;
 using TMDbLib.Objects.Movies;
 
@@ -111,7 +108,7 @@ namespace KodiMovieNfoLibrary
         ///     setting this to > 0 will mark the movie as watched if the "importwatchedstate" flag is set in advancedsettings.xml
         /// </summary>
         [XmlElement("playcount")]
-        public int PlayCount { get; set; } = 0;
+        public int PlayCount { get; set; }
 
         [XmlElement("id")]
         public string ImdbId { get; set; }
@@ -175,7 +172,7 @@ namespace KodiMovieNfoLibrary
             {
                 Title = movie.Title,
                 OriginalTitle = movie.OriginalTitle,
-                SortTitle = RootMovie.ToStaticTitle(movie.Title),
+                SortTitle = ToStaticTitle(movie.Title),
                 Rating = movie.VoteAverage,
                 Top250 = 0,
                 Votes = movie.VoteCount,
@@ -225,46 +222,5 @@ namespace KodiMovieNfoLibrary
     {
         [XmlElement("streamdetails")]
         public string StreamDetails { get; set; }
-    }
-
-    public static class XmlHelpers
-    {
-        public static string XmlSerializeToString(this object objectInstance)
-        {
-            var ns = new XmlSerializerNamespaces();
-
-            //Add an empty namespace and empty value
-            ns.Add("", "");
-            var serializer = new XmlSerializer(objectInstance.GetType());
-
-            var settings = new XmlWriterSettings();
-            settings.Indent = true;
-            settings.OmitXmlDeclaration = true;
-
-            using (var stream = new StringWriter())
-            using (var writer = XmlWriter.Create(stream, settings))
-            {
-                serializer.Serialize(writer, objectInstance, ns);
-                return stream.ToString();
-            }
-        }
-
-        public static T XmlDeserializeFromString<T>(this string objectData)
-        {
-            return (T)XmlDeserializeFromString(objectData, typeof(T));
-        }
-
-        public static object XmlDeserializeFromString(this string objectData, Type type)
-        {
-            var serializer = new XmlSerializer(type);
-            object result;
-
-            using (TextReader reader = new StringReader(objectData))
-            {
-                result = serializer.Deserialize(reader);
-            }
-
-            return result;
-        }
     }
 }

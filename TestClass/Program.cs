@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using KodiMovieNfoLibrary;
 using Nito.AsyncEx;
 using TMDbLib.Client;
@@ -11,15 +7,15 @@ using TMDbLib.Objects.Movies;
 
 namespace TestClass
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             AsyncContext.Run(() => MainAsync(args));
         }
-        static async void MainAsync(string[] args)
-        {
 
+        private static async void MainAsync(string[] args)
+        {
             //TMDbClient client = new TMDbClient("125e475654c781837d575da127e4d7bd");
             //Movie movie = await client.GetMovieAsync(258509, MovieMethods.Credits |
             //    MovieMethods.AlternativeTitles |
@@ -37,19 +33,19 @@ namespace TestClass
 
             var rd = File.ReadAllText(@"Q:\MyMovies.Library\004\MyMovies.L\Legend (1985)\movie.nfo");
             var r = rd.XmlDeserializeFromString<RootMovie>();
-            TMDbClient client = new TMDbClient("125e475654c781837d575da127e4d7bd");
-            Movie movie = await client.GetMovieAsync(r.TmdbId, MovieMethods.Credits |
-                MovieMethods.AlternativeTitles |
-                MovieMethods.Images |
-                MovieMethods.Keywords |
-                MovieMethods.ReleaseDates |
-                MovieMethods.Changes |
-                MovieMethods.Releases |
-                MovieMethods.Reviews |
-                MovieMethods.Similar);
+            var client = new TMDbClient("125e475654c781837d575da127e4d7bd");
+            var movie = await client.GetMovieAsync(r.TmdbId, MovieMethods.Credits |
+                                                             MovieMethods.AlternativeTitles |
+                                                             MovieMethods.Images |
+                                                             MovieMethods.Keywords |
+                                                             MovieMethods.ReleaseDates |
+                                                             MovieMethods.Changes |
+                                                             MovieMethods.Releases |
+                                                             MovieMethods.Reviews |
+                                                             MovieMethods.Similar);
 
             r = RootMovie.Convert(movie);
-            
+
             if (r.Genre.StartsWith("TMDbLib", StringComparison.InvariantCultureIgnoreCase)) r.Genre = "";
             //var st = @"<movie><title>Who knows</title><originaltitle>Who knows for real</originaltitle><sorttitle>Who knows 1</sorttitle><set>Who knows trilogy</set><rating>6.100000</rating><year>2008</year><top250>0</top250><votes>50</votes><outline>A look at the role of the Buckeye State in the 2004 Presidential Election.</outline><plot>A look at the role of the Buckeye State in the 2004 Presidential Election.</plot><tagline></tagline><runtime>90</runtime><thumb>http://ia.ec.imdb.com/media/imdb/01/I/25/65/31/10f.jpg</thumb><mpaa>Not available</mpaa><playcount>0</playcount><id>tt0432337</id><filenameandpath>c:\Dummy_Movie_Files\Movies\...So Goes The Nation.avi</filenameandpath><trailer></trailer><genre></genre><credits></credits><fileinfo><streamdetails/></fileinfo><studio>Dummy Pictures</studio><director>Adam Del Deo</director>"
             //         +
@@ -67,15 +63,12 @@ namespace TestClass
                     .Replace("</ActorName>", "</actor>")
                     .Replace("<ArrayOfActorName>\r\n", "")
                     .Replace("\r\n</ArrayOfActorName>", "")
-                    + "\r\n";
-               
+                     + "\r\n";
             }
             Console.WriteLine(r.XmlSerializeToString().Replace("</movie>", us + "</movie>"));
 
 
-
             Console.ReadKey();
-
         }
     }
 }
